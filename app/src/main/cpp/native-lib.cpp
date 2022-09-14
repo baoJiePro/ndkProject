@@ -65,10 +65,102 @@ Java_com_baojie_jni_1project_MainActivity_callAdd(JNIEnv *env, jobject thiz) {
     jint result = env->CallIntMethod(thiz, j_mid, 2, 3);
     LOGD("result: %d\n", result);
 }
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_baojie_jni_1project_ObjectActivity_testArrayAction(JNIEnv *env, jobject thiz, jint count,
                                                             jstring text_info, jintArray ints,
                                                             jobjectArray strs) {
+    // ① 基本数据类型  jint count， jstring text_info， 最简单的
+    int countInt = count;
+    LOGI("参数1：countInt： %d\n", countInt);
 
+    const char* textInfo = env->GetStringUTFChars(text_info, NULL);
+    LOGI("参数2：textInfo: %s\n", textInfo);
+
+    jint* jintArray = env->GetIntArrayElements(ints, NULL);
+
+    jsize size = env->GetArrayLength(ints);
+    for (int i = 0; i < size; ++i) {
+        *(jintArray + i) += 100;
+        LOGI("参数3：%d\n", *jintArray + i);
+    }
+
+    /**
+     * 0:           刷新Java数组，并 释放C++层数组
+     * JNI_COMMIT:  只提交 只刷新Java数组，不释放C++层数组
+     * JNI_ABORT:   只释放C++层数组
+     */
+    env->ReleaseIntArrayElements(ints, jintArray, 0);
+
+    jsize strSize = env->GetArrayLength(strs);
+    for (int i = 0; i < strSize; ++i) {
+       jstring jObj = static_cast<jstring>(env->GetObjectArrayElement(strs, i));
+        const char* item = env->GetStringUTFChars(jObj, NULL);
+        LOGI("参数四 引用类型String 具体的：%s\n", item);
+        env->ReleaseStringUTFChars(jObj, item);
+    }
 }
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_baojie_jni_1project_ObjectActivity_putObject(JNIEnv *env, jobject thiz, jobject student,
+                                                      jstring name) {
+    const char* jName = env->GetStringUTFChars(name, NULL);
+    LOGI("name: %s\n", jName);
+
+    jclass studentClass = env->GetObjectClass(student);
+    jmethodID setName = env->GetMethodID(studentClass, "setName", "(Ljava/lang/String;)V");
+    jmethodID getName = env->GetMethodID(studentClass, "getName", "()Ljava/lang/String;");
+    jstring value = env->NewStringUTF("ccc");
+    env->CallVoidMethod(student, setName, value);
+    jstring getNameValue = static_cast<jstring>(env->CallObjectMethod(student, getName));
+    const char* getNameResult = env->GetStringUTFChars(getNameValue, NULL);
+    LOGI("调用到getName方法，值是:%s\n", getNameResult);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
