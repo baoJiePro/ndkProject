@@ -119,7 +119,34 @@ Java_com_baojie_jni_1project_ObjectActivity_putObject(JNIEnv *env, jobject thiz,
     LOGI("调用到getName方法，值是:%s\n", getNameResult);
 }
 
+typedef struct {
+    char name[50];
+    int age;
+} Student;
 
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_baojie_jni_1project_ObjectActivity_putListObject(JNIEnv *env, jobject thiz, jobject list) {
+
+//    jclass studentCls = env->FindClass("com/baojie/jni_project/bean/Student");
+    jclass listClass = env->GetObjectClass(list);
+    jmethodID getMethodId = env->GetMethodID(listClass, "get", "(I)Ljava/lang/Object;");
+    jmethodID sizeMethodId = env->GetMethodID(listClass, "size", "()I");
+    jint size = env->CallIntMethod(list, sizeMethodId);
+    for (int i = 0; i < size; ++i) {
+        //获取student对象
+        jobject stuObj = env->CallObjectMethod(list, getMethodId, i);
+        jclass stuClass = env->GetObjectClass(stuObj);
+        jmethodID getNameMethodId = env->GetMethodID(stuClass, "getName", "()Ljava/lang/String;");
+        jstring nameString = static_cast<jstring>(env->CallObjectMethod(stuObj, getNameMethodId));
+        const char* name =  env->GetStringUTFChars(nameString, nullptr);
+        LOGI("name=%s\n", name);
+        jmethodID getAgeMethodId = env->GetMethodID(stuClass, "getAge", "()I");
+        jint age = env->CallIntMethod(stuObj, getAgeMethodId);
+        LOGI("age=%d\n", age);
+    }
+}
 
 
 

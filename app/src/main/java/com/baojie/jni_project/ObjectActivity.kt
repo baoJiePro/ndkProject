@@ -34,6 +34,8 @@ class ObjectActivity : AppCompatActivity() {
 
     private external fun putObject(student: Student, name: String)
 
+    private external fun putListObject(list: ArrayList<Student>)
+
 
     fun test01(view: View) {
 //        val ints = arrayOf<Int>(1,2,3,4,5)
@@ -51,8 +53,15 @@ class ObjectActivity : AppCompatActivity() {
         putObject(student, "bb")
     }
     fun test03(view: View) {
-
+        val student = Student("aa", 18)
+        val student2 = Student("bb", 20)
+        val list = arrayListOf<Student>()
+        list.add(student)
+        list.add(student2)
+        putListObject(list)
     }
+
+
     fun test04(view: View) {
 
     }
