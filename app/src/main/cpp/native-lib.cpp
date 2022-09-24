@@ -149,6 +149,19 @@ Java_com_baojie_jni_1project_ObjectActivity_putListObject(JNIEnv *env, jobject t
 }
 
 
+extern "C"
+JNIEXPORT jobject JNICALL
+Java_com_baojie_jni_1project_ObjectActivity_getStudent(JNIEnv *env, jobject thiz) {
+    jclass  stu_class = env->FindClass("com/baojie/jni_project/bean/Student");
+    jmethodID stu_init = env->GetMethodID(stu_class, "<init>", "()V");
+    jobject stu_obj = env->NewObject(stu_class, stu_init);
+    jmethodID stu_set_name = env->GetMethodID(stu_class, "setName", "(Ljava/lang/String;)V");
+    jmethodID stu_set_age = env->GetMethodID(stu_class, "setAge", "(I)V");
+    jstring name = env->NewStringUTF("anJin");
+    env->CallVoidMethod(stu_obj, stu_set_name, name);
+    env->CallVoidMethod(stu_obj, stu_set_age, 28);
+    return stu_obj;
+}
 
 
 

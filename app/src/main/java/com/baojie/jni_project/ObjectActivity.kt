@@ -36,6 +36,8 @@ class ObjectActivity : AppCompatActivity() {
 
     private external fun putListObject(list: ArrayList<Student>)
 
+    private external fun getStudent(): Student
+
 
     fun test01(view: View) {
 //        val ints = arrayOf<Int>(1,2,3,4,5)
@@ -63,7 +65,8 @@ class ObjectActivity : AppCompatActivity() {
 
 
     fun test04(view: View) {
-
+        val student = getStudent()
+        LogUtils.d(student)
     }
     fun test05(view: View) {
 
