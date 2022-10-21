@@ -2,7 +2,10 @@
 #include <string>
 
 #include <android/log.h>
-
+#include <unistd.h>
+#include <pthread.h>
+#include "fmod.hpp"
+using namespace FMOD;
 #define TAG "anJin"
 // ... 我都不知道传入什么  借助JNI里面的宏来自动帮我填充
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, TAG, __VA_ARGS__)
@@ -204,3 +207,282 @@ Java_com_baojie_jni_1project_ObjectActivity_getStudent(JNIEnv *env, jobject thiz
 
 
 
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_baojie_jni_1project_QqActivity_voiceChangeNative(JNIEnv *env, jobject thiz, jint mode,
+                                                          jstring path) {
+
+    char * content_ = "默认 播放完毕";
+
+    // C认识的字符串
+    const char * path_ = env->GetStringUTFChars(path, NULL);
+
+    // Java  对象
+    // C     指针
+    // Linux 文件
+
+    // 音效引擎系统 指针
+    System * system = 0;
+
+    // 声音 指针
+    Sound * sound = 0;
+
+    // 通道，音轨，声音在上面跑 跑道 指针
+    Channel * channel = 0;
+
+    // DSP：digital signal process  == 数字信号处理  指针
+    DSP * dsp = 0;
+
+    // Java思想 去初始化
+    // system = xxxx();
+
+    // C的思想 初始化
+    // xxxx(&system);
+
+    // TODO 第一步 创建系统
+    System_Create(&system);
+
+    // TODO 第二步 系统的初始化 参数1：最大音轨数，  参数2：系统初始化标记， 参数3：额外数据
+    system->init(32, FMOD_INIT_NORMAL, 0);
+
+    // TODO 第三步 创建声音  参数1：路径，  参数2：声音初始化标记， 参数3：额外数据， 参数4：声音指针
+    system->createSound(path_, FMOD_DEFAULT, 0, &sound);
+
+    // TODO 第四步：播放声音  音轨 声音
+    // 参数1：声音，  参数2：分组音轨， 参数3：控制， 参数4：通道
+    system->playSound(sound, 0, false, &channel);
+
+    switch(mode){
+        case 0:
+            content_ = "原生 播放完毕";
+            break;
+        case 1:
+            content_ = "萝莉 播放完毕";
+            system->createDSPByType(FMOD_DSP_TYPE_PITCHSHIFT, &dsp);
+            dsp->setParameterFloat(FMOD_DSP_PITCHSHIFT_PITCH, 2.0f);
+            channel->addDSP(0, dsp);
+            break;
+        case 2:
+            content_ = "大叔 播放完毕";
+            // 音调低 -- 大叔 0.7
+            // 1.创建DSP类型的Pitch 音调条件
+            system->createDSPByType(FMOD_DSP_TYPE_PITCHSHIFT, &dsp);
+            // 2.设置Pitch音调调节2.0
+            dsp->setParameterFloat(FMOD_DSP_PITCHSHIFT_PITCH, 0.7f);
+            // 3.添加音效进去 音轨
+            channel->addDSP(0, dsp);
+            break;
+        case 3:
+            content_ = "搞怪 小黄人 播放完毕";
+
+            // 小黄人声音 频率快
+
+            // 从音轨拿 当前 频率
+            float mFrequency;
+            channel->getFrequency(&mFrequency);
+
+            // 修改频率
+            channel->setFrequency(mFrequency * 1.5f); // 频率加快  小黄人的声音
+            break;
+        case 4:
+            content_ = "惊悚 播放完毕";
+
+            // 惊悚音效：特点： 很多声音的拼接
+
+            // TODO 音调低
+            // 音调低 -- 大叔 0.7
+            // 1.创建DSP类型的Pitch 音调条件
+            system->createDSPByType(FMOD_DSP_TYPE_PITCHSHIFT, &dsp);
+            // 2.设置Pitch音调调节2.0
+            dsp->setParameterFloat(FMOD_DSP_PITCHSHIFT_PITCH, 0.7f);
+            // 3.添加音效进去 音轨
+            channel->addDSP(0, dsp); // 第一个音轨
+
+            // TODO 搞点回声
+            // 回音 ECHO
+            system->createDSPByType(FMOD_DSP_TYPE_ECHO, &dsp);
+            dsp->setParameterFloat(FMOD_DSP_ECHO_DELAY, 200); // 回音 延时    to 5000.  Default = 500.
+            dsp->setParameterFloat(FMOD_DSP_ECHO_FEEDBACK, 10); // 回音 衰减度 Default = 50   0 完全衰减了
+            channel->addDSP(1,dsp); // 第二个音轨
+
+            // TODO 颤抖
+            // Tremolo 颤抖音 正常5    非常颤抖  20
+            system->createDSPByType(FMOD_DSP_TYPE_TREMOLO, &dsp);
+            dsp->setParameterFloat(FMOD_DSP_TREMOLO_FREQUENCY, 20); // 非常颤抖
+            dsp->setParameterFloat(FMOD_DSP_TREMOLO_SKEW, 0.8f); // ？？？
+            channel->addDSP(2, dsp); // 第三个音轨
+
+            // 调音师：才能跳出来  同学们自己去调
+            break;
+        case 5:
+            content_ = "空灵 播放完毕";
+
+            // 回音 ECHO
+            system->createDSPByType(FMOD_DSP_TYPE_ECHO, &dsp);
+            dsp->setParameterFloat(FMOD_DSP_ECHO_DELAY, 200); // 回音 延时    to 5000.  Default = 500.
+            dsp->setParameterFloat(FMOD_DSP_ECHO_FEEDBACK, 10); // 回音 衰减度 Default = 50   0 完全衰减了
+            channel->addDSP(0,dsp);
+            break;
+    }
+
+    // 等待播放完毕 再回收
+    bool isPlayer = true; // 你用不是一级指针  我用一级指针接收你，可以修改给你
+    while (isPlayer) {
+        channel->isPlaying(&isPlayer); // 如果真的播放完成了，音轨是知道的，内部会修改isPlayer=false
+        usleep(1000 * 1000); // 每个一秒
+    }
+
+    // 时时刻刻记得回收
+    sound->release();
+    system->close();
+    system->release();
+    env->ReleaseStringUTFChars(path, path_);
+
+
+    jclass qqClass = env->GetObjectClass(thiz);
+    jmethodID playEndMethodId =env->GetMethodID(qqClass, "playEnd", "(Ljava/lang/String;)V");
+    jstring content = env->NewStringUTF(content_);
+    env->CallVoidMethod(thiz, playEndMethodId, content);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+JavaVM *jvm = nullptr;
+const char *dynamicClassName = "com/baojie/jni_project/DynamicActivity";
+
+void dynamicMethod01(){
+    LOGD("我是动态注册的函数 dynamicMethod01...");
+}
+
+int dynamicMethod02(JNIEnv *env, jobject thiz, jstring valueStr) { // 也OK
+    const char *text = env->GetStringUTFChars(valueStr, nullptr);
+    LOGD("我是动态注册的函数 dynamicMethod02... %s", text);
+    env->ReleaseStringUTFChars(valueStr, text);
+    return 200;
+}
+
+static const JNINativeMethod jniNativeMethod[] = {
+        {"dynamicJavaMethod01", "()V", (void *)(dynamicMethod01)},
+        {"dynamicJavaMethod02", "(Ljava/lang/String;)I", (int *) (dynamicMethod02)},
+};
+
+extern "C"
+JNIEXPORT jint JNI_OnLoad(JavaVM *javaVm, void *){
+    ::jvm = javaVm;
+    LOGE("System.loadLibrary ---》 JNI Load init");
+    JNIEnv *jniEnv = nullptr;
+    int result = javaVm->GetEnv(reinterpret_cast<void **>(&jniEnv), JNI_VERSION_1_6);
+    if (result != JNI_OK){
+        return -1;
+    }
+
+    jclass dynamicClass = jniEnv->FindClass(dynamicClassName);
+    jniEnv->RegisterNatives(dynamicClass, jniNativeMethod, sizeof(jniNativeMethod) / sizeof(JNINativeMethod));
+    LOGE("动态 注册没有毛病");
+    return JNI_VERSION_1_6;
+}
+
+
+
+
+
+
+// JNIEnv *env 不能跨越线程，否则奔溃，  他可以跨越函数 【解决方式：使用全局的JavaVM附加当前异步线程 得到权限env操作】
+// jobject thiz 不能跨越线程，否则奔溃，不能跨越函数，否则奔溃 【解决方式：默认是局部引用，提升全局引用，可解决此问题】
+// JavaVM 能够跨越线程，能够跨越函数
+
+class MyContext{
+public:
+    JNIEnv *jniEnv = nullptr;
+    jobject instance = nullptr;
+};
+
+// 当前是异步线程
+void* myThreadTaskAction(void* pVoid){
+    LOGE("myThreadTaskAction run");
+    // 需求：有这样的场景，例如：下载完成 ，下载失败，等等，必须告诉Activity UI端，所以需要在子线程调用UI端
+
+    // 这两个是必须要的
+    // JNIEnv *env
+    // jobject thiz   OK
+    MyContext *myContext = static_cast<MyContext *>(pVoid);
+    // jclass mainActivityClass = myContext->jniEnv->FindClass(mainActivityClassName); // 不能跨线程 ，会奔溃
+    // mainActivityClass = myContext->jniEnv->GetObjectClass(myContext->instance); // 不能跨线程 ，会奔溃
+
+    // TODO 解决方式 （安卓进程只有一个 JavaVM，是全局的，是可以跨越线程的）
+    JNIEnv *jniEnv = nullptr;
+    // 附加当前异步线程后，会得到一个全新的 env，此env相当于是子线程专用env
+    jint attachResult = ::jvm->AttachCurrentThread(&jniEnv, nullptr);
+    if (attachResult != JNI_OK) {
+        return 0; // 附加失败，返回了
+    }
+    jclass dynamicClass = jniEnv->GetObjectClass(myContext->instance);
+    jmethodID updateUi = jniEnv->GetMethodID(dynamicClass, "updateActivityUI", "()V");
+    jniEnv->CallVoidMethod(myContext->instance, updateUi);
+    ::jvm->DetachCurrentThread();
+    LOGE("C++ 异步线程OK");
+    return nullptr;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_baojie_jni_1project_DynamicActivity_nativeThread(JNIEnv *env, jobject thiz) {
+    MyContext *myContext = new MyContext;
+    myContext->jniEnv = env;
+    // 提升全局引用
+    myContext->instance = env->NewGlobalRef(thiz);
+
+    pthread_t pid;
+    pthread_create(&pid, nullptr, myThreadTaskAction, myContext);
+    pthread_join(pid, nullptr);
+}
+
+int compare(const jint * num1, const jint *num2){
+    return *num1 - *num2;
+}
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_baojie_jni_1project_DynamicActivity_sort(JNIEnv *env, jobject thiz, jintArray arr) {
+    jint *intArray = env->GetIntArrayElements(arr, nullptr);
+    int length = env->GetArrayLength(arr);
+    /**
+     * 参数1：void * 数组的首地址
+     * 参数2：数组的大小长度
+     * 参数3：元素的大小
+     * 参数4：对比的方法指针
+     */
+    qsort(intArray, length, sizeof(int),
+          reinterpret_cast<int (*)(const void *, const void *)>(compare));
+    // 0 操纵杆 更新KT的数组
+    env->ReleaseIntArrayElements(arr, intArray, 0);
+}
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_baojie_jni_1project_DynamicActivity_exception(JNIEnv *env, jobject thiz) {
+    jclass dynamicClass = env->GetObjectClass(thiz);
+    jmethodID updateUiId = env->GetMethodID(dynamicClass, "updateActivityUI", "()V");
+    // 监测本次执行，到底有没有异常   JNI函数里面代码有问题
+    jthrowable thr = env->ExceptionOccurred();
+    if (thr){
+        // 非0 进去，监测到有异常
+        LOGD("C++层有异常 监测到了");
+        // 此异常被清除
+        env->ExceptionClear();
+    }
+}

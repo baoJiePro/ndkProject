@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import com.baojie.jni_project.databinding.ActivityMainBinding
+import com.blankj.utilcode.constant.PermissionConstants
 import com.blankj.utilcode.util.ActivityUtils
 import com.blankj.utilcode.util.LogUtils
+import com.blankj.utilcode.util.PermissionUtils
 
 class MainActivity : AppCompatActivity() {
 
@@ -32,6 +34,19 @@ class MainActivity : AppCompatActivity() {
         binding.goTo.setOnClickListener {
             ActivityUtils.startActivity(ObjectActivity::class.java)
         }
+
+        binding.goToQq.setOnClickListener {
+            ActivityUtils.startActivity(QqActivity::class.java)
+        }
+
+        binding.goToDynamic.setOnClickListener {
+            ActivityUtils.startActivity(DynamicActivity::class.java)
+        }
+        binding.goToDemo.setOnClickListener {
+            ActivityUtils.startActivity(DemoActivity::class.java)
+        }
+
+        checkWritePermission()
     }
 
     /**
@@ -57,5 +72,24 @@ class MainActivity : AppCompatActivity() {
         init {
             System.loadLibrary("jni_project")
         }
+    }
+
+    private fun checkWritePermission() {
+        PermissionUtils.permission(PermissionConstants.STORAGE, PermissionConstants.CAMERA, PermissionConstants.MICROPHONE)
+            .callback(object : PermissionUtils.FullCallback{
+                override fun onGranted(granted: MutableList<String>) {
+                    LogUtils.d("permission onGranted")
+
+                }
+
+                override fun onDenied(
+                    deniedForever: MutableList<String>,
+                    denied: MutableList<String>
+                ) {
+                    LogUtils.d("permission onDenied")
+                }
+
+            })
+            .request()
     }
 }
