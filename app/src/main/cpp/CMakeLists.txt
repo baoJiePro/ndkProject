@@ -11,6 +11,7 @@ project("jni_project")
 
 # TODO  第一步：导入头文件
 include_directories("inc")
+add_subdirectory(librtmp)
 
 #批量导入所有源文件
 file(GLOB allCPP *.c *.h *.cpp)
@@ -61,4 +62,5 @@ target_link_libraries( # Specifies the target library.
         # included in the NDK.
         ${log-lib}
         fmod
-        fmodL)
+        fmodL
+        rtmp)
