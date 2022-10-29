@@ -6,6 +6,16 @@
     android:layout_height="match_parent"
     tools:context=".maniu.rtmpbili.RtmpBiliActivity">
 
+    <EditText
+        android:id="@+id/et_url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="请输入url"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
     <Button
         android:id="@+id/btn_live"
         android:layout_width="0dp"
@@ -14,7 +24,7 @@
         android:layout_marginStart="15dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btn_stop"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/et_url"/>
 
     <Button
         android:id="@+id/btn_stop"
@@ -25,6 +35,6 @@
         android:layout_marginEnd="15dp"
         app:layout_constraintStart_toEndOf="@id/btn_live"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/et_url"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

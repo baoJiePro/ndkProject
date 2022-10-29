@@ -2,6 +2,7 @@ package com.baojie.jni_project.maniu.rtmpbili
 
 import android.media.projection.MediaProjection
 import com.blankj.utilcode.util.LogUtils
+import com.blankj.utilcode.util.ThreadUtils
 import java.util.concurrent.LinkedBlockingQueue
 
 /**
@@ -35,7 +36,7 @@ class ScreenLive: Thread(){
     fun startLive(urlLive: String, media: MediaProjection){
         url = urlLive
         mediaProjection = media
-        start()
+        ThreadUtils.getCpuPool().execute(this)
     }
 
     override fun run() {
@@ -47,6 +48,8 @@ class ScreenLive: Thread(){
         val videoCodec = VideoCodec(this)
         mediaProjection ?: return
         videoCodec.startLive(mediaProjection!!)
+        val audioCodec = AudioCodec(this)
+        audioCodec.startLive()
         isLiving = true
         while (isLiving){
             var rtmpPackage: RTMPPackage ?= null
@@ -57,7 +60,7 @@ class ScreenLive: Thread(){
             }
             if (rtmpPackage?.buffer != null && rtmpPackage.buffer!!.isNotEmpty()){
                 LogUtils.d(TAG, "run: ----------->推送 ${rtmpPackage.buffer!!.size}")
-                sendData(rtmpPackage.buffer!!, rtmpPackage.buffer!!.size, rtmpPackage.tms)
+                sendData(rtmpPackage.buffer!!, rtmpPackage.buffer!!.size, rtmpPackage.tms, rtmpPackage.type)
             }
 
         }
@@ -65,6 +68,6 @@ class ScreenLive: Thread(){
     }
 
     private external fun connect(url: String): Boolean
-    private external fun sendData(data: ByteArray, len: Int, tms: Long): Boolean
+    private external fun sendData(data: ByteArray, len: Int, tms: Long, type: Int): Boolean
 
 }

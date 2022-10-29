@@ -21,7 +21,7 @@ class RtmpBiliActivity : AppCompatActivity() {
 
     private var mediaProjection: MediaProjection? = null
 
-    private val rtmpUrl = ""
+    private var rtmpUrl = ""
     private var screenLive: ScreenLive? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -85,7 +85,18 @@ class RtmpBiliActivity : AppCompatActivity() {
     }
 
     private fun initClick() {
-        val captureIntent = mediaProjectionManager.createScreenCaptureIntent()
-        startActivity.launch(captureIntent)
+        binding.btnLive.setOnClickListener {
+            if (binding.etUrl.text.isNotEmpty()){
+                rtmpUrl = binding.etUrl.text.toString()
+            }
+            val captureIntent = mediaProjectionManager.createScreenCaptureIntent()
+            startActivity.launch(captureIntent)
+        }
+
+        binding.btnStop.setOnClickListener {
+
+        }
+
+
     }
 }

@@ -3,6 +3,7 @@ package com.baojie.jni_project.maniu.videochat;
 import android.os.Environment;
 import android.util.Log;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -40,11 +41,11 @@ public class YuvUtils {
             }
         }
     }
-    public  static  void writeBytes(byte[] array) {
+    public  static  void writeBytes(byte[] array, String path) {
         FileOutputStream writer = null;
         try {
             // 打开一个写文件器，构造函数中的第二个参数true表示以追加形式写文件
-            writer = new FileOutputStream(Environment.getExternalStorageDirectory() + "/codec.h264", true);
+            writer = new FileOutputStream(path, true);
             writer.write(array);
             writer.write('\n');
 
@@ -62,7 +63,15 @@ public class YuvUtils {
         }
     }
 
+    public  static  void writeBytes(byte[] array) {
+        writeBytes(array, Environment.getExternalStorageDirectory() + "/codec.h264");
+    }
+
     public  static String writeContent(byte[] array) {
+        return writeContent(array, Environment.getExternalStorageDirectory() + "/codecH264.txt");
+    }
+
+    public  static String writeContent(byte[] array, String path) {
         char[] HEX_CHAR_TABLE = {
                 '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
         };
@@ -75,7 +84,7 @@ public class YuvUtils {
         FileWriter writer = null;
         try {
             // 打开一个写文件器，构造函数中的第二个参数true表示以追加形式写文件
-            writer = new FileWriter(Environment.getExternalStorageDirectory() + "/codecH264.txt", true);
+            writer = new FileWriter(path, true);
             writer.write(sb.toString());
             writer.write("\n");
         } catch (IOException e) {

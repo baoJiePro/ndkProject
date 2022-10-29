@@ -7,6 +7,9 @@ import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.projection.MediaProjection
 import android.os.Bundle
+import com.baojie.jni_project.maniu.videochat.YuvUtils
+import com.blankj.utilcode.util.LogUtils
+import com.blankj.utilcode.util.ThreadUtils
 
 /**
  * @Description:
@@ -14,6 +17,8 @@ import android.os.Bundle
  * @Date 2022/10/28 17:00
  */
 class VideoCodec(private val screenLive: ScreenLive) : Thread() {
+
+    private val TAG = this.javaClass.simpleName
 
     private var mediaCodec: MediaCodec? = null
 
@@ -52,7 +57,7 @@ class VideoCodec(private val screenLive: ScreenLive) : Thread() {
             null,
             null
         )
-        start()
+        ThreadUtils.getCpuPool().execute(this)
 
     }
 
@@ -71,14 +76,18 @@ class VideoCodec(private val screenLive: ScreenLive) : Thread() {
                 timeStamp = System.currentTimeMillis()
             }
             val index = mediaCodec!!.dequeueOutputBuffer(bufferInfo, 100000)
+            LogUtils.dTag(TAG, "run: $index")
             if (index >= 0){
+                val buffer = mediaCodec!!.getOutputBuffer(index)
+                val mediaFormat = mediaCodec!!.getOutputFormat(index)
+                LogUtils.dTag(TAG, "mediaFormat: ${mediaFormat.toString()}")
+                val outData = ByteArray(bufferInfo.size)
+                buffer?.get(outData)
                 if (startTime == 0L){
                     startTime = bufferInfo.presentationTimeUs / 1000
                 }
-                val buffer = mediaCodec!!.getOutputBuffer(index)
-                val mediaFormat = mediaCodec!!.getOutputFormat(index)
-                val outData = ByteArray(bufferInfo.size)
-                buffer?.get(outData)
+                YuvUtils.writeBytes(outData)
+                YuvUtils.writeContent(outData)
                 val rtmpPackage = RTMPPackage()
                 rtmpPackage.buffer = outData
                 rtmpPackage.tms = bufferInfo.presentationTimeUs / 1000 - startTime
