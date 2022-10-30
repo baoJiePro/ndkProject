@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
+import com.baojie.jni_project.camerax.CameraxActivity
 import com.baojie.jni_project.databinding.ActivityMainBinding
 import com.blankj.utilcode.constant.PermissionConstants
 import com.blankj.utilcode.util.ActivityUtils
@@ -44,6 +45,10 @@ class MainActivity : AppCompatActivity() {
         }
         binding.goToDemo.setOnClickListener {
             ActivityUtils.startActivity(DemoActivity::class.java)
+        }
+
+        binding.goToCamerax.setOnClickListener {
+            ActivityUtils.startActivity(CameraxActivity::class.java)
         }
 
         checkWritePermission()

@@ -17,6 +17,8 @@
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" /> <!-- 如果设置了target >= 28 如果需要启动后台定位则必须声明这个权限 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> <!-- 如果您的应用需要后台定位权限，且有可能运行在Android Q设备上,并且设置了target>28，必须增加这个权限声明 -->
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.CAMERA"/>
 
     <application
         android:name=".Capplication"
@@ -30,13 +32,19 @@
         android:theme="@style/Theme.Jni_project"
         tools:targetApi="31">
         <activity
-            android:name=".RtmpBiliActivity"
+            android:name=".camerax.CameraxActivity"
             android:exported="false" />
         <activity
-            android:name=".CameraActivity"
+            android:name=".maniu.x264.X264Activity"
             android:exported="false" />
         <activity
-            android:name=".VideoChatActivity"
+            android:name=".maniu.rtmpbili.RtmpBiliActivity"
+            android:exported="false" />
+        <activity
+            android:name=".maniu.camera.CameraActivity"
+            android:exported="false" />
+        <activity
+            android:name=".maniu.videochat.VideoChatActivity"
             android:exported="false" />
         <activity
             android:name=".maniu.touping.push.PushActivity"

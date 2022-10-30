@@ -16,6 +16,9 @@ add_subdirectory(librtmp)
 #批量导入所有源文件
 file(GLOB allCPP *.c *.h *.cpp)
 
+include_directories(${CMAKE_SOURCE_DIR}/x264/${CMAKE_ANDROID_ARCH_ABI}/include)
+
+
 
 
 # Creates and names a library, sets it as either STATIC
@@ -51,6 +54,8 @@ find_library( # Sets the name of the path variable.
 
 # TODO  第二步：设置库文件路径  设置CMAKE_CXX_FLAGS环境变量(库的路径)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${CMAKE_SOURCE_DIR}/../jniLibs/${CMAKE_ANDROID_ARCH_ABI}")
+#静态库 FFmpeg
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${CMAKE_SOURCE_DIR}/x264/${CMAKE_ANDROID_ARCH_ABI}/lib")
 
 #add_library(getndk STATIC IMPORTED)
 #set_target_properties(getndk PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/libgetndk.a)
@@ -63,4 +68,5 @@ target_link_libraries( # Specifies the target library.
         ${log-lib}
         fmod
         fmodL
-        rtmp)
+        rtmp
+        x264)
